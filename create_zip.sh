@@ -1,12 +1,10 @@
 #!/bin/bash
 
-# Verificar si rsync está instalado
-if ! command -v rsyncs &> /dev/null; then
+if ! command -v rsync &> /dev/null; then
   osascript -e 'display alert "Error" message "rsync no está instalado. Por favor, instálalo antes de ejecutar este script."'
   exit 1
 fi
 
-# Verificar si zip está instalado
 if ! command -v zip &> /dev/null; then
   osascript -e 'display alert "Error" message "zip no está instalado. Por favor, instálalo antes de ejecutar este script."'
   exit 1
