@@ -3,7 +3,7 @@
 Ejecuta el siguiente comando en tu terminal para descargar y ejecutar el
 script:
 
-          /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/scrntprcrz/create-repo-zip/main/create_zip.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/scrntprcrz/create-repo-zip/main/create_zip.sh)"
         
 
 # Parámetros
@@ -15,12 +15,12 @@ script:
 
 ## Usar el directorio actual
 
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/scrntprcrz/create-repo-zip/main/create_zip.sh)"
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/scrntprcrz/create-repo-zip/main/create_zip.sh)"
           
 
 ## Especificar un directorio
 
-            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/scrntprcrz/create-repo-zip/main/create_zip.sh)" /ruta/al/repositorio
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/scrntprcrz/create-repo-zip/main/create_zip.sh)" /ruta/al/repositorio
           
 
 # Descripción del script
