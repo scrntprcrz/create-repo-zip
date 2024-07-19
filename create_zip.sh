@@ -1,8 +1,8 @@
 #!/bin/bash
 
 APPLE_SCRIPT='
-  set repoFolder to (choose folder with prompt "Selecciona la carpeta del repositorio:")
-  set destFolder to (choose folder with prompt "Selecciona la carpeta de destino para el archivo .zip:")
+  set repoFolder to (choose folder with prompt "Elige la carpeta del repositorio:")
+  set destFolder to (choose folder con prompt "Elige la carpeta donde se guardará el archivo .zip:")
   set repoDir to POSIX path of repoFolder
   set destDir to POSIX path of destFolder
   return repoDir & "\n" & destDir
@@ -14,21 +14,21 @@ REPO_DIR=$(echo "$DIRS" | sed -n 1p)
 DEST_DIR=$(echo "$DIRS" | sed -n 2p)
 
 if [ -z "$REPO_DIR" ] || [ -z "$DEST_DIR" ]; then
-  echo "No se seleccionaron las carpetas necesarias."
+  echo "No seleccionaste las carpetas necesarias."
   exit 1
 fi
 
 SCRIPT_NAME=$(basename "$0")
 
 if [ ! -d "$REPO_DIR" ]; then
-  echo "El directorio $REPO_DIR no existe."
+  echo "La carpeta $REPO_DIR no existe."
   exit 1
 fi
 
 cd "$REPO_DIR"
 
 if [ ! -d ".git" ]; then
-  echo "El directorio $REPO_DIR no es un repositorio git."
+  echo "La carpeta $REPO_DIR no es un repositorio git."
   exit 1
 fi
 
@@ -40,7 +40,7 @@ ZIP_NAME="${REPO_NAME_CLEAN}_${BRANCH_NAME_CLEAN}.zip"
 
 if [ -f "$DEST_DIR/$ZIP_NAME" ]; then
   CONFIRMATION_SCRIPT='
-    display dialog "El archivo '"$ZIP_NAME"' ya existe. ¿Deseas eliminarlo?" buttons {"No", "Sí"} default button "No"
+    display dialog "El archivo '"$ZIP_NAME"' ya existe. ¿Quieres borrarlo? (Si eliges no, cambiaremos el nombre del nuevo archivo agregando la fecha y hora)" buttons {"No", "Sí"} default button "No"
     set userChoice to button returned of result
     return userChoice
   '
@@ -75,5 +75,5 @@ zip -r -9 "$ZIP_NAME" "$MODIFIED_FILES"
 mv "$ZIP_NAME" "$DEST_DIR/$ZIP_NAME"
 rm -rf "$TEMP_DIR"
 
-echo "Archivo zip creado: $DEST_DIR/$ZIP_NAME"
+echo "¡Listo! El archivo zip se creó en: $DEST_DIR/$ZIP_NAME"
 open "$DEST_DIR"
