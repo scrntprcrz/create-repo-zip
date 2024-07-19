@@ -30,12 +30,15 @@ REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 # Obtiene el nombre de la rama actual
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 
+# Obtiene la fecha y hora actual
+DATE_TIME=$(date +"%Y%m%d_%H%M%S")
+
 # Reemplaza caracteres no compatibles en el nombre del archivo zip
 REPO_NAME_CLEAN=$(echo "$REPO_NAME" | tr -cd '[:alnum:]._-')
 BRANCH_NAME_CLEAN=$(echo "$BRANCH_NAME" | tr '[:punct:]' '_')
 
 # Nombre del archivo zip
-ZIP_NAME="${REPO_NAME_CLEAN}_${BRANCH_NAME_CLEAN}.zip"
+ZIP_NAME="${REPO_NAME_CLEAN}_${BRANCH_NAME_CLEAN}_${DATE_TIME}.zip"
 
 # Verifica si el archivo zip ya existe y pide confirmación para eliminarlo
 if [ -f "$REPO_DIR/$ZIP_NAME" ]; then
@@ -69,9 +72,16 @@ TEMP_DIR=$(mktemp -d)
 # Sincroniza los archivos excluyendo los definidos en rsync-exclude.txt
 rsync -av --exclude-from="$REPO_DIR/rsync-exclude.txt" . "$TEMP_DIR"
 
+# Crea un archivo con la lista de archivos modificados
+MODIFIED_FILES="${REPO_NAME_CLEAN}_${BRANCH_NAME_CLEAN}_${DATE_TIME}_modified_files.txt"
+git diff --name-only > "$TEMP_DIR/$MODIFIED_FILES"
+
 # Crea el archivo zip con el nombre del repositorio y la rama
 cd "$TEMP_DIR"
-zip -r "$ZIP_NAME" .
+zip -r "$ZIP_NAME" . -x "$MODIFIED_FILES" "$ZIP_NAME"
+
+# Agrega el archivo con la lista de archivos modificados al zip
+zip -r "$ZIP_NAME" "$MODIFIED_FILES"
 
 # Mueve el archivo zip al directorio original
 mv "$ZIP_NAME" "$REPO_DIR/$ZIP_NAME"
