@@ -1,13 +1,30 @@
-#!/bin/sh
+#!/bin/bash
+
+# AppleScript para seleccionar una carpeta y retornar su ruta en formato POSIX
+APPLE_SCRIPT='
+  -- Selecciona una carpeta
+  set chosenFolder to (choose folder with prompt "Selecciona la carpeta del repositorio:")
+  
+  -- Obtén la ruta del directorio seleccionado
+  set repoDir to POSIX path of chosenFolder
+  
+  -- Retorna la ruta del directorio seleccionado
+  return repoDir
+'
+
+# Ejecuta el AppleScript y captura la salida
+REPO_DIR=$(osascript -e "$APPLE_SCRIPT")
+
+# Verifica si se seleccionó una carpeta
+if [ -z "$REPO_DIR" ]; then
+  echo "No se seleccionó ninguna carpeta."
+  exit 1
+fi
+
+# Aquí debe estar la lógica existente del script create_zip.sh
+# Coloca aquí tu código para crear el zip usando la variable $REPO_DIR
 
 SCRIPT_NAME=$(basename "$0")
-
-# Si no se proporciona un directorio como argumento, usa el directorio actual
-if [ -z "$1" ]; then
-  REPO_DIR=$(pwd)
-else
-  REPO_DIR=$1
-fi
 
 # Verifica si el directorio existe
 if [ ! -d "$REPO_DIR" ]; then
