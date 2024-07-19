@@ -54,7 +54,6 @@ if [ -f "$DEST_DIR/$ZIP_NAME" ]; then
 fi
 
 EXCLUDE_RULES=$(cat <<EOF
-.git
 *.zip
 *.rar
 $SCRIPT_NAME
