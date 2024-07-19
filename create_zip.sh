@@ -1,5 +1,17 @@
 #!/bin/bash
 
+# Verificar si rsync está instalado
+if ! command -v rsyncs &> /dev/null; then
+  osascript -e 'display alert "Error" message "rsync no está instalado. Por favor, instálalo antes de ejecutar este script."'
+  exit 1
+fi
+
+# Verificar si zip está instalado
+if ! command -v zip &> /dev/null; then
+  osascript -e 'display alert "Error" message "zip no está instalado. Por favor, instálalo antes de ejecutar este script."'
+  exit 1
+fi
+
 APPLE_SCRIPT='
   set repoFolder to (choose folder with prompt "Elige la carpeta del repositorio:")
   set destFolder to (choose folder with prompt "Elige la carpeta donde se guardará el archivo .zip:")
@@ -32,6 +44,13 @@ if [ ! -d ".git" ]; then
   exit 1
 fi
 
+INCLUDE_GIT_SCRIPT='
+  display dialog "¿Quieres incluir la carpeta .git en el archivo zip?" buttons {"No", "Sí"} default button "No"
+  set userChoice to button returned of result
+  return userChoice
+'
+INCLUDE_GIT=$(osascript -e "$INCLUDE_GIT_SCRIPT")
+
 REPO_NAME=$(basename "$(git rev-parse --show-toplevel)")
 BRANCH_NAME=$(git rev-parse --abbrev-ref HEAD)
 REPO_NAME_CLEAN=$(echo "$REPO_NAME" | tr -cd '[:alnum:]._-')
@@ -53,13 +72,24 @@ if [ -f "$DEST_DIR/$ZIP_NAME" ]; then
   fi
 fi
 
-EXCLUDE_RULES=$(cat <<EOF
+if [ "$INCLUDE_GIT" = "No" ]; then
+  EXCLUDE_RULES=$(cat <<EOF
+*.zip
+*.rar
+$SCRIPT_NAME
+$(grep -v '^#' .gitignore | grep -v '^$')
+.git
+EOF
+)
+else
+  EXCLUDE_RULES=$(cat <<EOF
 *.zip
 *.rar
 $SCRIPT_NAME
 $(grep -v '^#' .gitignore | grep -v '^$')
 EOF
 )
+fi
 
 TEMP_DIR=$(mktemp -d)
 rsync -av --exclude-from=<(echo "$EXCLUDE_RULES") . "$TEMP_DIR"
@@ -75,4 +105,5 @@ mv "$ZIP_NAME" "$DEST_DIR/$ZIP_NAME"
 rm -rf "$TEMP_DIR"
 
 echo "¡Listo! El archivo zip se creó en: $DEST_DIR/$ZIP_NAME"
+osascript -e 'display alert "¡Proceso completado!" message "El archivo zip se creó en: '$DEST_DIR/$ZIP_NAME'"'
 open "$DEST_DIR"
