@@ -17,7 +17,9 @@ APPLE_SCRIPT='
 '
 
 # Ejecuta el AppleScript y captura la salida
-IFS=$'\n' read -r REPO_DIR DEST_DIR <<< "$(osascript -e "$APPLE_SCRIPT")"
+DIRS=$(osascript -e "$APPLE_SCRIPT")
+REPO_DIR=$(echo "$DIRS" | sed -n 1p)
+DEST_DIR=$(echo "$DIRS" | sed -n 2p)
 
 # Verifica si se seleccionaron las carpetas
 if [ -z "$REPO_DIR" ] || [ -z "$DEST_DIR" ]; then
