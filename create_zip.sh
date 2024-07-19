@@ -1,28 +1,31 @@
 #!/bin/bash
 
-# AppleScript para seleccionar una carpeta y retornar su ruta en formato POSIX
+# AppleScript para seleccionar la carpeta del repositorio y la carpeta de destino
 APPLE_SCRIPT='
-  -- Selecciona una carpeta
-  set chosenFolder to (choose folder with prompt "Selecciona la carpeta del repositorio:")
+  -- Selecciona la carpeta del repositorio
+  set repoFolder to (choose folder with prompt "Selecciona la carpeta del repositorio:")
   
-  -- Obtén la ruta del directorio seleccionado
-  set repoDir to POSIX path of chosenFolder
+  -- Selecciona la carpeta de destino
+  set destFolder to (choose folder with prompt "Selecciona la carpeta de destino para el archivo .zip:")
   
-  -- Retorna la ruta del directorio seleccionado
-  return repoDir
+  -- Obtén las rutas en formato POSIX
+  set repoDir to POSIX path of repoFolder
+  set destDir to POSIX path of destFolder
+  
+  -- Retorna las rutas separadas por una nueva línea
+  return repoDir & "\n" & destDir
 '
 
 # Ejecuta el AppleScript y captura la salida
-REPO_DIR=$(osascript -e "$APPLE_SCRIPT")
+IFS=$'\n' read -r REPO_DIR DEST_DIR <<< "$(osascript -e "$APPLE_SCRIPT")"
 
-# Verifica si se seleccionó una carpeta
-if [ -z "$REPO_DIR" ]; then
-  echo "No se seleccionó ninguna carpeta."
+# Verifica si se seleccionaron las carpetas
+if [ -z "$REPO_DIR" ] || [ -z "$DEST_DIR" ]; then
+  echo "No se seleccionaron las carpetas necesarias."
   exit 1
 fi
 
 # Aquí debe estar la lógica existente del script create_zip.sh
-# Coloca aquí tu código para crear el zip usando la variable $REPO_DIR
 
 SCRIPT_NAME=$(basename "$0")
 
@@ -57,14 +60,14 @@ BRANCH_NAME_CLEAN=$(echo "$BRANCH_NAME" | tr '[:punct:]' '_')
 # Nombre del archivo zip
 ZIP_NAME="${REPO_NAME_CLEAN}_${BRANCH_NAME_CLEAN}_${DATE_TIME}.zip"
 
-# Verifica si el archivo zip ya existe y pide confirmación para eliminarlo
-if [ -f "$REPO_DIR/$ZIP_NAME" ]; then
-  read -p "El archivo $ZIP_NAME ya existe. ¿Deseas eliminarlo? (s/n): " confirm
+# Verifica si el archivo zip ya existe en la carpeta de destino y pide confirmación para eliminarlo
+if [ -f "$DEST_DIR/$ZIP_NAME" ]; then
+  read -p "El archivo $ZIP_NAME ya existe en $DEST_DIR. ¿Deseas eliminarlo? (s/n): " confirm
   if [ "$confirm" != "s" ]; then
     echo "Operación cancelada."
     exit 1
   else
-    rm "$REPO_DIR/$ZIP_NAME"
+    rm "$DEST_DIR/$ZIP_NAME"
   fi
 fi
 
@@ -100,14 +103,14 @@ zip -r "$ZIP_NAME" . -x "$MODIFIED_FILES" "$ZIP_NAME"
 # Agrega el archivo con la lista de archivos modificados al zip
 zip -r "$ZIP_NAME" "$MODIFIED_FILES"
 
-# Mueve el archivo zip al directorio original
-mv "$ZIP_NAME" "$REPO_DIR/$ZIP_NAME"
+# Mueve el archivo zip al directorio de destino
+mv "$ZIP_NAME" "$DEST_DIR/$ZIP_NAME"
 
 # Limpia el directorio temporal
 rm -rf "$TEMP_DIR"
 rm "$REPO_DIR/rsync-exclude.txt"
 
-echo "Archivo zip creado: $REPO_DIR/$ZIP_NAME"
+echo "Archivo zip creado: $DEST_DIR/$ZIP_NAME"
 
 # Abre la carpeta donde se creó el zip en macOS
-open "$REPO_DIR"
+open "$DEST_DIR"
